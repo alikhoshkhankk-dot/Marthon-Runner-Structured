@@ -3,10 +3,9 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
-
 using namespace std;
 
-const int NUM_RUNNERS = 5;
+const int MAX_RUNNERS = 50;
 const int NUM_DAYS = 7;
 
 struct Runner
@@ -17,13 +16,16 @@ struct Runner
     double average;
 };
 
-void readData(ifstream& file, Runner runners[]);
-void calculateData(Runner runners[]);
-void displayData(Runner runners[]);
+int readRunnerData(ifstream& file, Runner runners[]);
+void calculateTotalsAndAverages(Runner runners[], int recordCount);
+void displayResults(Runner runners[], int recordCount);
 
 int main()
 {
-    Runner runners[NUM_RUNNERS];
+    Runner runners[MAX_RUNNERS];
+    int recordCount;
+    int numberOfRunners;
+    int numberOfDays;
 
     ifstream file("runners.txt");
 
@@ -33,44 +35,68 @@ int main()
         return 1;
     }
 
-    readData(file, runners);
+    file >> numberOfRunners >> numberOfDays;
+
+    if (!file || numberOfDays != NUM_DAYS)
+    {
+        cout << "Invalid file header." << endl;
+        file.close();
+        return 1;
+    }
+
+    recordCount = readRunnerData(file, runners);
 
     file.close();
 
-    calculateData(runners);
-
-    displayData(runners);
+    calculateTotalsAndAverages(runners, recordCount);
+    displayResults(runners, recordCount);
 
     return 0;
 }
 
-void readData(ifstream& file, Runner runners[])
+int readRunnerData(ifstream& file, Runner runners[])
 {
-    int numberOfRunners;
-    int numberOfDays;
+    int recordCount = 0;
 
-    file >> numberOfRunners >> numberOfDays;
-
-    for (int i = 0; i < NUM_RUNNERS; i++)
+    while (recordCount < MAX_RUNNERS)
     {
-        file >> runners[i].name;
-
-        for (int j = 0; j < NUM_DAYS; j++)
+        if (!(file >> runners[recordCount].name))
         {
-            file >> runners[i].miles[j];
+            break;
         }
+
+        bool complete = true;
+
+        for (int day = 0; day < NUM_DAYS; day++)
+        {
+            if (!(file >> runners[recordCount].miles[day]))
+            {
+                complete = false;
+                break;
+            }
+        }
+
+        if (!complete)
+        {
+            break;
+        }
+
+        recordCount++;
     }
+
+    return recordCount;
 }
 
-void calculateData(Runner runners[])
+void calculateTotalsAndAverages(
+    Runner runners[], int recordCount)
 {
-    for (int i = 0; i < NUM_RUNNERS; i++)
+    for (int i = 0; i < recordCount; i++)
     {
         runners[i].total = 0;
 
-        for (int j = 0; j < NUM_DAYS; j++)
+        for (int day = 0; day < NUM_DAYS; day++)
         {
-            runners[i].total += runners[i].miles[j];
+            runners[i].total += runners[i].miles[day];
         }
 
         runners[i].average =
@@ -78,34 +104,35 @@ void calculateData(Runner runners[])
     }
 }
 
-void displayData(Runner runners[])
+void displayResults(Runner runners[], int recordCount)
 {
     cout << fixed << setprecision(2);
 
-    cout << left << setw(12) << "Runner";
+    cout << left << setw(15) << "Runner";
 
-    for (int i = 1; i <= NUM_DAYS; i++)
+    for (int day = 1; day <= NUM_DAYS; day++)
     {
         cout << right << setw(8)
-            << ("Day " + to_string(i));
+            << ("Day " + to_string(day));
     }
 
     cout << setw(10) << "Total";
     cout << setw(10) << "Average" << endl;
 
-    cout << string(96, '-') << endl;
-
-    for (int i = 0; i < NUM_RUNNERS; i++)
+    for (int i = 0; i < recordCount; i++)
     {
-        cout << left << setw(12) << runners[i].name;
+        cout << left << setw(15) << runners[i].name;
 
-        for (int j = 0; j < NUM_DAYS; j++)
+        for (int day = 0; day < NUM_DAYS; day++)
         {
             cout << right << setw(8)
-                << runners[i].miles[j];
+                << runners[i].miles[day];
         }
 
         cout << setw(10) << runners[i].total;
         cout << setw(10) << runners[i].average << endl;
     }
+
+    cout << "\nNumber of runners read: "
+        << recordCount << endl;
 }
