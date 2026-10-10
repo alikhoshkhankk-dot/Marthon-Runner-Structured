@@ -5,8 +5,11 @@
 #include <string>
 using namespace std;
 
+// Set the maximum number of runner and days in a week.
 const int MAX_RUNNERS = 50;
 const int NUM_DAYS = 7;
+
+// Store all information for one runner.
 
 struct Runner
 {
@@ -15,6 +18,8 @@ struct Runner
     double total;
     double average;
 };
+
+
 
 int readRunnerData(ifstream& file, Runner runners[]);
 void calculateTotalsAndAverages(Runner runners[], int recordCount);
