@@ -19,7 +19,7 @@ struct Runner
     double average;
 };
 
-
+// Read runner records and return the number of complete records.
 
 int readRunnerData(ifstream& file, Runner runners[]);
 void calculateTotalsAndAverages(Runner runners[], int recordCount);
@@ -52,6 +52,8 @@ int main()
     recordCount = readRunnerData(file, runners);
 
     file.close();
+
+    // Calculate the total and average mileage for each valid runner.
 
     calculateTotalsAndAverages(runners, recordCount);
     displayResults(runners, recordCount);
